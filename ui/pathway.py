@@ -10,9 +10,9 @@ class PathwaySystem:
         self.completed = [False] * len(self.steps)
 
     def show_pathway(self):
-        print("\n📌 YOUR PATHWAY:\n")
+        print("\n YOUR PATHWAY:\n")
         for i, step in enumerate(self.steps):
-            status = "✔ Completed" if self.completed[i] else "❌ Not Done"
+            status = "✔ Completed" if self.completed[i] else " Not Done"
             print(f"{i+1}. {step} ---> {status}")
 
     def complete_step(self, step_no):
@@ -20,7 +20,7 @@ class PathwaySystem:
             self.completed[step_no - 1] = True
             print(f" Step {step_no} marked as completed!")
         else:
-            print("❌ Invalid step number!")
+            print(" Invalid step number!")
 
     def next_step(self):
         for i, done in enumerate(self.completed):
