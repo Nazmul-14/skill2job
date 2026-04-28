@@ -27,7 +27,7 @@ class PathwaySystem:
             if not done:
                 print(f"\n Next Step: {self.steps[i]}")
                 return
-        print("\n🎉 All steps completed! You are job ready!")
+        print("\n All steps completed! You are job ready!")
 
     def run(self):
         while True:
