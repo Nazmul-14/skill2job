@@ -33,8 +33,9 @@ def save_data(data):
 
 class CV(tk.Frame):
 
-    def __init__(self, parent):
+    def __init__(self, parent,user_id):
         super().__init__(parent, bg="white")
+        self.user_id = user_id
 
         self.data = load_data()
 
@@ -65,7 +66,7 @@ class CV(tk.Frame):
         header.pack(pady=30)
 
         # ✅ IMAGE FIX
-        if self.data.get("photo") and os.path.exists(self.data["photo"]):
+        if self.data.get("photo") and os.path.exists(self.data.get("photo")):
             try:
                 img = Image.open(self.data["photo"])
                 img = img.resize((120, 120))
@@ -149,7 +150,7 @@ class CV(tk.Frame):
 
             e = tk.Entry(frame, width=50)
             e.grid(row=r, column=1, pady=5)
-            e.insert(0, self.data.get(f, ""))
+            e.insert(0, str(self.data.get(f, "")))
 
             self.entries[f] = e
             r += 1
@@ -287,7 +288,7 @@ if __name__ == "__main__":
     root.title("CV Builder")
     root.geometry("1200x700")
 
-    app = CV(root)
+    app = CV(root, user_id=1)
     app.pack(fill="both", expand=True)
 
     root.mainloop()

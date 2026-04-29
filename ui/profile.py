@@ -9,8 +9,9 @@ DATA_FILE = "data/profile.json"
 
 class Profile(tk.Frame):
 
-    def __init__(self, parent):
+    def __init__(self, parent,user_id):
         super().__init__(parent, bg="#eeeeee")
+        self.user_id = user_id
 
         self.entries = {}
         self.photo_path = None

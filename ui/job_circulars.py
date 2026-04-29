@@ -2,9 +2,9 @@ import tkinter as tk
 from data.job_data import jobs
 
 class JobCirculars(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent,user_id):
         super().__init__(parent, bg="white")
-
+        self.user_id = user_id;
         self.jobs=jobs
 
         # Search bar (center top)
