@@ -1,10 +1,11 @@
 import tkinter as tk
+
 from ui.sidebar import Sidebar
 from ui.job_circulars import JobCirculars
 from ui.profile import Profile
 from ui.cv import CV
 from ui.skills import Skills
-from ui.pathway import Pathway
+from ui.pathway import Pathway   # FIXED
 
 
 class App(tk.Tk):
@@ -14,43 +15,37 @@ class App(tk.Tk):
         self.title("Skill2BD")
         self.geometry("1200x720")
         self.minsize(1000, 600)
-        self.resizable(True, True)
         self.configure(bg="white")
 
-        # -------- Sidebar --------
+        # Sidebar
         self.sidebar = Sidebar(self, self.show_page)
         self.sidebar.pack(side="left", fill="y")
 
-        # -------- Main Content Container --------
+        # Container
         self.container = tk.Frame(self, bg="#eeeeee")
         self.container.pack(side="right", fill="both", expand=True)
 
-        # IMPORTANT: allow container resize properly
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
 
         self.pages = {}
         self.load_pages()
 
-        # Default page
         self.show_page("JobCirculars")
 
-    # ================= LOAD PAGES =================
     def load_pages(self):
-
         self.pages = {
             "JobCirculars": JobCirculars(self.container),
             "MyJob": JobCirculars(self.container),
             "CV": CV(self.container),
             "Skills": Skills(self.container),
-            "Pathway": Pathway(self.container),
+            "Pathway": Pathway(self.container),   # FIXED
             "Profile": Profile(self.container),
         }
 
         for page in self.pages.values():
             page.grid(row=0, column=0, sticky="nsew")
 
-    # ================= PAGE SWITCH =================
     def show_page(self, page_name):
         page = self.pages.get(page_name)
         if page:
