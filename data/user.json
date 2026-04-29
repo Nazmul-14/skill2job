@@ -1,0 +1,43 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Jakaria",
+      "email": "jakaria@gmail.com",
+      "password": "1234",
+      "skills": ["Python", "SQL"],
+      "pathway_step": 2,
+      "cv": {
+        "summary": "CSE Student",
+        "education": "BSc in CSE",
+        "experience": "None"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Rahim",
+      "email": "rahim@gmail.com",
+      "password": "1111",
+      "skills": ["Java", "OOP"],
+      "pathway_step": 1,
+      "cv": {
+        "summary": "Junior Developer",
+        "education": "Diploma in CS",
+        "experience": "Internship"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Karim",
+      "email": "karim@gmail.com",
+      "password": "2222",
+      "skills": ["HTML", "CSS", "JavaScript"],
+      "pathway_step": 3,
+      "cv": {
+        "summary": "Frontend Developer",
+        "education": "Self-taught",
+        "experience": "Freelancer"
+      }
+    }
+  ]
+}
