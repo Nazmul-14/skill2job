@@ -1,129 +1,113 @@
 import tkinter as tk
 
-
-class Pathway(tk.Frame):
-    def __init__(self, parent):
-        super().__init__(parent, bg="white")
-
-        # ================= TITLE =================
-        tk.Label(
-            self,
-            text="Career Pathway",
-            font=("Arial", 18, "bold"),
-            bg="white"
-        ).pack(pady=20)
-
-        # ================= MENU =================
-        self.menu_options = [
-            "1. Show Pathway",
-            "2. Complete a Step",
-            "3. Show Next Step",
-            "4. Reset Progress"
+class PathwaySystem:
+    def __init__(self):
+        self.steps = [
+            "Learn Basics (Python / C / Java)",
+            "Intermediate Skills (DSA, OOP)",
+            "Projects + GitHub",
+            "Advanced Skills (MySQL, Django/Flask)",
+            "Job Ready (CV + Apply)"
         ]
+        self.completed = [False] * len(self.steps)
 
-        self.menu_label = tk.Label(
-            self,
-            text="\n".join(self.menu_options),
-            font=("Arial", 12),
-            bg="white",
-            justify="left"
-        )
-        self.menu_label.pack(pady=10)
+    def complete_step(self, index):
+        if 0 <= index < len(self.steps):
+            self.completed[index] = True
+            return f"✅ {self.steps[index]} completed!"
+        return "❌ Invalid step number"
 
-        # ================= INPUT =================
-        self.entry = tk.Entry(self, width=30, font=("Arial", 12))
-        self.entry.pack(pady=5)
+    def complete_all_steps(self):
+        self.completed = [True] * len(self.steps)
+        return "🎉 All steps completed!"
 
-        tk.Button(
-            self,
-            text="Submit",
-            width=15,
-            command=self.handle_input
-        ).pack(pady=5)
+    def get_progress(self):
+        total = len(self.steps)
+        done = sum(self.completed)
+        return int((done / total) * 100)
 
-        # ================= OUTPUT =================
-        self.output = tk.Label(
-            self,
-            text="",
-            font=("Arial", 12),
-            bg="white",
-            fg="blue",
-            wraplength=400,
-            justify="left"
-        )
-        self.output.pack(pady=15)
+    def get_next_step(self):
+        for i in range(len(self.completed)):
+            if not self.completed[i]:
+                return f"➡ Next Step: {self.steps[i]}"
+        return "🎉 All steps completed!"
 
-        # ================= DATA =================
-        self.pathway_steps = [
-            "Learn Python Basics",
-            "Learn Data Structures",
-            "Learn Algorithms",
-            "Build Projects",
-            "Apply for Jobs"
-        ]
+    def reset(self):
+        self.completed = [False] * len(self.steps)
+        return "🔄 Progress Reset!"
 
-        self.completed_steps = 0
+    def show_all(self):
+        text = ""
+        for i, step in enumerate(self.steps):
+            status = "✅" if self.completed[i] else "❌"
+            text += f"{i+1}. {step} {status}\n"
+        return text
 
-        # ================= PROGRESS =================
-        self.progress_label = tk.Label(
-            self,
-            text="Progress: 0%",
-            font=("Arial", 12, "bold"),
-            bg="white"
-        )
-        self.progress_label.pack(pady=10)
 
-    # ================= HANDLE INPUT =================
-    def handle_input(self):
-        choice = self.entry.get().strip()
+# ===== GUI =====
+app = PathwaySystem()
 
-        if choice == "1":
-            self.show_pathway()
+def submit_action():
+    try:
+        choice = int(choice_entry.get())
 
-        elif choice == "2":
-            self.complete_step()
+        if choice == 1:
+            output.set(app.show_all())
 
-        elif choice == "3":
-            self.show_next_step()
+        elif choice == 2:
+            step = int(step_entry.get()) - 1
+            output.set(app.complete_step(step))
 
-        elif choice == "4":
-            self.reset_progress()
+        elif choice == 3:
+            output.set(app.get_next_step())
+
+        elif choice == 4:
+            output.set(app.reset())
 
         else:
-            self.output.config(text="❌ Invalid choice")
+            output.set("❌ Invalid choice")
 
-        self.entry.delete(0, tk.END)
+    except:
+        output.set("⚠ Enter valid numbers!")
 
-    # ================= FUNCTIONS =================
+    progress_label.config(text=f"Progress: {app.get_progress()}%")
 
-    def show_pathway(self):
-        text = "📌 Full Pathway:\n\n"
-        for i, step in enumerate(self.pathway_steps, 1):
-            status = "✅" if i <= self.completed_steps else "⬜"
-            text += f"{status} {i}. {step}\n"
 
-        self.output.config(text=text)
+def complete_all_action():
+    output.set(app.complete_all_steps())
+    progress_label.config(text=f"Progress: {app.get_progress()}%")
 
-    def complete_step(self):
-        if self.completed_steps < len(self.pathway_steps):
-            self.completed_steps += 1
-            self.update_progress()
-            self.output.config(text="✅ Step completed!")
-        else:
-            self.output.config(text="🎉 All steps completed!")
 
-    def show_next_step(self):
-        if self.completed_steps < len(self.pathway_steps):
-            next_step = self.pathway_steps[self.completed_steps]
-            self.output.config(text=f"➡ Next Step:\n{next_step}")
-        else:
-            self.output.config(text="🎉 You finished everything!")
+# Window
+root = tk.Tk()
+root.title("Skill2BD - Career Pathway")
+root.geometry("500x420")
 
-    def reset_progress(self):
-        self.completed_steps = 0
-        self.update_progress()
-        self.output.config(text="🔄 Progress reset!")
+# Title
+tk.Label(root, text="Career Pathway", font=("Arial", 16, "bold")).pack(pady=10)
 
-    def update_progress(self):
-        percent = int((self.completed_steps / len(self.pathway_steps)) * 100)
-        self.progress_label.config(text=f"Progress: {percent}%")
+# Options
+tk.Label(root, text="1. Show Pathway\n2. Complete a Step\n3. Show Next Step\n4. Reset Progress").pack()
+
+# Input fields
+tk.Label(root, text="Enter Choice:").pack()
+choice_entry = tk.Entry(root)
+choice_entry.pack()
+
+tk.Label(root, text="Enter Step (for option 2):").pack()
+step_entry = tk.Entry(root)
+step_entry.pack()
+
+# Buttons
+tk.Button(root, text="Submit", command=submit_action).pack(pady=8)
+tk.Button(root, text="Complete All (100%)", command=complete_all_action, bg="green", fg="white").pack(pady=5)
+
+# Output
+output = tk.StringVar()
+tk.Label(root, textvariable=output, fg="blue").pack()
+
+# Progress
+progress_label = tk.Label(root, text="Progress: 0%", font=("Arial", 12, "bold"))
+progress_label.pack(pady=10)
+
+root.mainloop()
