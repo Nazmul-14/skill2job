@@ -2,6 +2,7 @@ import tkinter as tk
 
 from ui.sidebar import Sidebar
 from ui.job_circulars import JobCirculars
+from ui.my_job import MyJob
 from ui.profile import Profile
 from ui.cv import CV
 from ui.skills import Skills
@@ -9,7 +10,24 @@ from ui.pathway import Pathway
 from ui.login import LoginPage
 from ui.register import RegisterPage
 
+from database.db import create_table, insert_sample_data, connect_db
 
+
+# ================= DB INIT =================
+def init_database():
+    create_table()
+
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM jobs")
+    count = cursor.fetchone()[0]
+    conn.close()
+
+    if count == 0:
+        insert_sample_data()
+
+
+# ================= APP =================
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -19,71 +37,60 @@ class App(tk.Tk):
         self.minsize(1000, 600)
         self.configure(bg="white")
 
-        #  Current logged-in user
+        init_database()
+
+        # session user
         self.current_user = None
 
-        #  Main container (right side)
         self.container = tk.Frame(self, bg="#eeeeee")
         self.container.pack(side="right", fill="both", expand=True)
 
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
 
-        # Sidebar (initially hidden)
         self.sidebar = None
-
         self.pages = {}
 
-        #  Start with Login Page
         self.show_login()
 
     # ================= LOGIN =================
     def show_login(self):
-        for w in self.container.winfo_children():
-            w.destroy()
+        self.clear()
 
-        self.login_page = LoginPage(
+        LoginPage(
             self.container,
             self.on_login_success,
             self.show_register
-        )
-        self.login_page.pack(fill="both", expand=True)
+        ).pack(fill="both", expand=True)
 
     def show_register(self):
-        for w in self.container.winfo_children():
-            w.destroy()
+        self.clear()
 
-        self.register_page = RegisterPage(
+        RegisterPage(
             self.container,
-            self.on_login_success,  # register → login success
+            self.on_login_success,
             self.show_login
-        )
-        self.register_page.pack(fill="both", expand=True)
-
+        ).pack(fill="both", expand=True)
 
     def on_login_success(self, user):
         self.current_user = user
 
-        # clear login UI
-        for w in self.container.winfo_children():
-            w.destroy()
+        self.clear()
 
-        # create sidebar now
+        # sidebar
         self.sidebar = Sidebar(self, self.show_page)
         self.sidebar.pack(side="left", fill="y")
 
-        # load main UI
         self.load_pages()
-
         self.show_page("JobCirculars")
 
-    # ================= LOAD PAGES =================
+    # ================= PAGES =================
     def load_pages(self):
         uid = self.current_user["id"]
 
         self.pages = {
             "JobCirculars": JobCirculars(self.container, uid),
-            "MyJob": JobCirculars(self.container, uid),
+            "MyJob": MyJob(self.container, uid),
             "CV": CV(self.container, uid),
             "Skills": Skills(self.container, uid),
             "Pathway": Pathway(self.container, uid),
@@ -93,28 +100,19 @@ class App(tk.Tk):
         for page in self.pages.values():
             page.grid(row=0, column=0, sticky="nsew")
 
-    # ================= PAGE SWITCH =================
-    def show_page(self, page_name):
-        page = self.pages.get(page_name)
+    # ================= NAV =================
+    def show_page(self, name):
+        page = self.pages.get(name)
         if page:
             page.tkraise()
 
-    # ================= LOGOUT =================
-    def logout(self):
-        self.current_user = None
-        self.pages = {}
-
-        # clear UI
+    # ================= UTILS =================
+    def clear(self):
         for w in self.container.winfo_children():
             w.destroy()
 
-        if self.sidebar:
-            self.sidebar.destroy()
-            self.sidebar = None
 
-        self.show_login()
-
-
+# ================= RUN =================
 if __name__ == "__main__":
     app = App()
     app.mainloop()
