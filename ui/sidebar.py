@@ -3,7 +3,7 @@ import tkinter as tk
 
 class Sidebar(tk.Frame):
     def __init__(self, parent, callback):
-        super().__init__(parent, width=230, bg="#e58b8b")
+        super().__init__(parent, width=230, bg="#B9E8FF")
         self.callback = callback
         self.pack_propagate(False)
 
@@ -11,7 +11,7 @@ class Sidebar(tk.Frame):
         tk.Label(
             self,
             text="Skill2BD",
-            bg="#6b4c4c",
+            bg="#42A5F5",
             fg="white",
             font=("Arial", 16, "bold"),
             pady=20
@@ -38,8 +38,8 @@ class Sidebar(tk.Frame):
             self,
             text=text,
             anchor="w",
-            bg="#e58b8b",
-            activebackground="#d17f7f",
+            bg="#d9d9d9",
+            activebackground="#42A5F5",
             bd=0,
             font=("Arial", 12),
             command=lambda: self.callback(page)

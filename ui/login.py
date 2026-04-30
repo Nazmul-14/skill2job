@@ -4,7 +4,7 @@ from core.data_manager import login_user
 
 class LoginPage(tk.Frame):
     def __init__(self, parent, on_login, go_to_register):
-        super().__init__(parent, bg="white")
+        super().__init__(parent, bg="#FFFAF0")
 
         self.on_login = on_login
         self.go_to_register = go_to_register

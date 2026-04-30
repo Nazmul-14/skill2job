@@ -35,7 +35,7 @@ class App(tk.Tk):
         self.title("Skill2BD")
         self.geometry("1200x720")
         self.minsize(1000, 600)
-        self.configure(bg="white")
+        self.configure(bg="#D3D3D3")
 
         init_database()
 
