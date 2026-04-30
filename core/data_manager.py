@@ -2,7 +2,7 @@ import json
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FILE = r"E:\SDP_200\Skill2Job\data\user.json"
+FILE = os.path.join(BASE_DIR, "..", "data", "user.json")
 
 
 # ================= LOAD =================
