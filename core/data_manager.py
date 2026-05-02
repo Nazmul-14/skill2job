@@ -4,6 +4,9 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE = os.path.join(BASE_DIR, "..", "data", "user.json")
 
+# 🔥 NEW FILE
+SKILL_FILE = os.path.join(BASE_DIR, "..", "data", "skill.json")
+
 
 # ================= LOAD =================
 def load_data():
@@ -23,6 +26,26 @@ def save_data(data):
         json.dump(data, f, indent=4)
 
 
+# ================= SKILL LOAD =================
+def load_skill_data():
+    if not os.path.exists(SKILL_FILE):
+        return {}
+
+    try:
+        with open(SKILL_FILE, "r") as f:
+            return json.load(f)
+    except:
+        return {}
+
+
+# ================= SKILL SAVE =================
+def save_skill_data(data):
+    os.makedirs(os.path.dirname(SKILL_FILE), exist_ok=True)
+
+    with open(SKILL_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
+
 # ================= LOGIN =================
 def login_user(email, password):
     data = load_data()
@@ -31,12 +54,11 @@ def login_user(email, password):
     password = password.strip()
 
     for user in data["users"]:
-
         u_email = user["email"].strip().lower()
         u_pass = str(user["password"]).strip()
 
         if u_email == email and u_pass == password:
-            return user
+            return get_user_by_id(user["id"])  # 🔥 skills সহ return
 
     return None
 
@@ -45,12 +67,10 @@ def login_user(email, password):
 def register_user(name, email, password):
     data = load_data()
 
-    # check duplicate email
     for user in data["users"]:
         if user["email"] == email:
             return None
 
-    # generate new id
     new_id = 1
     if data["users"]:
         new_id = max(u["id"] for u in data["users"]) + 1
@@ -60,7 +80,7 @@ def register_user(name, email, password):
         "name": name,
         "email": email,
         "password": password,
-        "skills": [],
+        "skills": {},  # 🔥 now dict হবে
         "pathway_step": 0,
         "cv": {}
     }
@@ -74,9 +94,16 @@ def register_user(name, email, password):
 # ================= GET USER =================
 def get_user_by_id(user_id):
     data = load_data()
+    skill_data = load_skill_data()
 
     for user in data["users"]:
         if user["id"] == user_id:
+            # 🔥 skills আলাদা file থেকে load
+            user["skills"] = skill_data.get(str(user_id), {
+                "Programming Languages": [],
+                "Database": [],
+                "Tools": []
+            })
             return user
 
     return None
@@ -85,36 +112,43 @@ def get_user_by_id(user_id):
 # ================= UPDATE USER =================
 def update_user(updated_user):
     data = load_data()
+    skill_data = load_skill_data()
 
     for i, user in enumerate(data["users"]):
         if user["id"] == updated_user["id"]:
-            data["users"][i] = updated_user
+
+            # 🔥 skills আলাদা করে save
+            user_copy = updated_user.copy()
+            skills = user_copy.pop("skills", {})
+
+            data["users"][i] = user_copy
+            skill_data[str(updated_user["id"])] = skills
             break
 
     save_data(data)
+    save_skill_data(skill_data)
 
 
 # ================= SKILLS =================
 def add_skill(user_id, skill):
-    user = get_user_by_id(user_id)
+    skill_data = load_skill_data()
+    user_id = str(user_id)
 
-    if not user:
-        return
+    if user_id not in skill_data:
+        skill_data[user_id] = []
 
-    if skill not in user["skills"]:
-        user["skills"].append(skill)
-        update_user(user)
+    if skill not in skill_data[user_id]:
+        skill_data[user_id].append(skill)
+        save_skill_data(skill_data)
 
 
 def remove_skill(user_id, skill):
-    user = get_user_by_id(user_id)
+    skill_data = load_skill_data()
+    user_id = str(user_id)
 
-    if not user:
-        return
-
-    if skill in user["skills"]:
-        user["skills"].remove(skill)
-        update_user(user)
+    if user_id in skill_data and skill in skill_data[user_id]:
+        skill_data[user_id].remove(skill)
+        save_skill_data(skill_data)
 
 
 # ================= PATHWAY =================

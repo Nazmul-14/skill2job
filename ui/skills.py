@@ -11,21 +11,22 @@ class Skills(tk.Frame):
         self.user = get_user_by_id(user_id)
 
         # ===== LOAD USER SKILLS =====
-        raw_skills = self.user.get("skills", [])
+        raw_skills = self.user.get("skills", {})
 
-        # old list → convert to category dict
-        if isinstance(raw_skills, list):
-            self.skills = {
-                "Programming Languages": raw_skills,
-                "Database": [],
-                "Tools": []
-            }
-        else:
-            self.skills = raw_skills
+        # Ensure correct structure
+        if not isinstance(raw_skills, dict):
+            raw_skills = {}
+
+        self.skills = {
+            "Programming Languages": raw_skills.get("Programming Languages", []),
+            "Database": raw_skills.get("Database", []),
+            "Tools": raw_skills.get("Tools", [])
+        }
 
         self.selected_category = None
         self.selected_index = None
 
+        # ===== MAIN CONTAINER =====
         container = tk.Frame(self, bg="white")
         container.pack(fill="both", expand=True, padx=20, pady=20)
 
@@ -48,15 +49,21 @@ class Skills(tk.Frame):
                  font=("Segoe UI", 14, "bold"),
                  bg="#ecf0f1").pack(pady=15)
 
-        # safe category init
-        default_cat = list(self.skills.keys())[0] if self.skills else "Programming Languages"
-        self.category = tk.StringVar(value=default_cat)
+        # Category dropdown
+        self.category = tk.StringVar(value="Programming Languages")
+        tk.OptionMenu(
+            right,
+            self.category,
+            "Programming Languages",
+            "Database",
+            "Tools"
+        ).pack(pady=10)
 
-        tk.OptionMenu(right, self.category, *self.skills.keys()).pack(pady=10)
-
+        # Entry
         self.entry = tk.Entry(right)
         self.entry.pack(pady=10)
 
+        # Buttons
         tk.Button(right, text="Add",
                   bg="#27ae60", fg="white",
                   width=18, command=self.add_skill).pack(pady=5)
@@ -98,9 +105,11 @@ class Skills(tk.Frame):
 
                 lbl.pack(anchor="w", padx=10)
 
-                lbl.bind("<Button-1>",
-                         lambda e, c=category, idx=i, val=item:
-                         self.select_skill(c, idx, val))
+                lbl.bind(
+                    "<Button-1>",
+                    lambda e, c=category, idx=i, val=item:
+                    self.select_skill(c, idx, val)
+                )
 
     # ===== SELECT =====
     def select_skill(self, category, index, value):
@@ -144,6 +153,11 @@ class Skills(tk.Frame):
         self.save_user()
         self.refresh_display()
 
+        # reset selection
+        self.selected_category = None
+        self.selected_index = None
+        self.entry.delete(0, tk.END)
+
     # ===== DELETE =====
     def delete_skill(self):
         if self.selected_category is None:
@@ -157,12 +171,13 @@ class Skills(tk.Frame):
             del self.skills[self.selected_category][self.selected_index]
             self.save_user()
             self.refresh_display()
+
             self.entry.delete(0, tk.END)
             self.selected_category = None
             self.selected_index = None
 
 
-# ===== TEST RUN (optional) =====
+# ===== TEST RUN =====
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("Skills Test")

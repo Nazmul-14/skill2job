@@ -5,22 +5,6 @@
             "name": "Jakaria",
             "email": "jakaria@gmail.com",
             "password": "1234",
-            "skills": {
-                "Programming Languages": [
-                    "Python",
-                    "java",
-                    "c++"
-                ],
-                "Database": [
-                    "SQL",
-                    "my sql"
-                ],
-                "Tools": [
-                    "GIT hub",
-                    "android studio",
-                    "pycharm"
-                ]
-            },
             "pathway_step": 2,
             "cv": {
                 "summary": "CSE Student",
