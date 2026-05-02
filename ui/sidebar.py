@@ -13,7 +13,7 @@ class Sidebar(tk.Frame):
         # ---------- LOGO ----------
         tk.Label(
             self,
-            text="Skill2BD",
+            text="Skill2Job",
             bg="#42A5F5",
             fg="white",
             font=("Arial", 16, "bold"),
