@@ -9,7 +9,7 @@ class JobCirculars(tk.Frame):
     def __init__(self, parent, uid):
         super().__init__(parent, bg="#F4F6F9")
 
-        self.uid = uid  # future use (save job, apply etc)
+        self.uid = uid
 
         self.jobs = get_all_jobs()
         self.active_filter = "All"
@@ -126,10 +126,11 @@ class JobCirculars(tk.Frame):
         self.content_frame.bind("<Configure>", lambda e: self.canvas.configure(
             scrollregion=self.canvas.bbox("all")))
 
-        self.canvas.bind_all("<MouseWheel>", lambda e: self.canvas.yview_scroll(
-            int(-1 * (e.delta / 120)), "units"))
+        self.canvas.bind("<Enter>", lambda e: self.canvas.bind_all("<MouseWheel>", self._on_mousewheel))
+        self.canvas.bind("<Leave>", lambda e: self.canvas.unbind_all("<MouseWheel>"))
 
-
+    def _on_mousewheel(self, event):
+        self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
     # FILTER LOGIC
 
     def _apply_filters(self):

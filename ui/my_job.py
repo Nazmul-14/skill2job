@@ -115,9 +115,11 @@ class MyJob(tk.Frame):
         self.content_frame.bind("<Configure>", lambda e: self.canvas.configure(
             scrollregion=self.canvas.bbox("all")))
 
-        self.canvas.bind_all("<MouseWheel>", lambda e: self.canvas.yview_scroll(
-            int(-1 * (e.delta / 120)), "units"))
+        self.canvas.bind("<Enter>", lambda e: self.canvas.bind_all("<MouseWheel>", self._on_mousewheel))
+        self.canvas.bind("<Leave>", lambda e: self.canvas.unbind_all("<MouseWheel>"))
 
+    def _on_mousewheel(self, event):
+        self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     # LOAD & FILTER
 
