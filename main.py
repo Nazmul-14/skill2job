@@ -35,7 +35,7 @@ class App(tk.Tk):
         self.title("Skill2BD")
         self.geometry("1200x720")
         self.minsize(1000, 600)
-        self.configure(bg="white")
+        self.configure(bg="#D3D3D3")
 
         init_database()
 
@@ -78,7 +78,7 @@ class App(tk.Tk):
         self.clear()
 
         # sidebar
-        self.sidebar = Sidebar(self, self.show_page)
+        self.sidebar = Sidebar(self, self.show_page, self.logout)
         self.sidebar.pack(side="left", fill="y")
 
         self.load_pages()
@@ -110,6 +110,20 @@ class App(tk.Tk):
     def clear(self):
         for w in self.container.winfo_children():
             w.destroy()
+
+    def logout(self):
+        self.current_user = None
+
+        # sidebar remove
+        if self.sidebar:
+            self.sidebar.destroy()
+            self.sidebar = None
+
+        # pages clear
+        self.pages = {}
+
+        # login screen
+        self.show_login()
 
 
 # ================= RUN =================

@@ -1,14 +1,11 @@
 import tkinter as tk
 from tkinter import filedialog
-import json
-import os
-import tempfile
+import json, os, tempfile
 
-# IMAGE (ALL FORMAT SUPPORT)
-from PIL import Image, ImageTk
+import self
+from PIL import Image, ImageTk, ImageDraw
 from PIL import Image as PILImage
 
-# PDF
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.styles import ParagraphStyle
@@ -17,7 +14,6 @@ from reportlab.lib.units import inch
 FILE = "cv_data.json"
 
 
-# ================= LOAD =================
 def load_data():
     if os.path.exists(FILE):
         with open(FILE, "r") as f:
@@ -25,7 +21,6 @@ def load_data():
     return {}
 
 
-# ================= SAVE =================
 def save_data(data):
     with open(FILE, "w") as f:
         json.dump(data, f, indent=4)
@@ -39,256 +34,280 @@ class CV(tk.Frame):
 
         self.data = load_data()
 
-        top = tk.Frame(self, bg="white")
-        top.pack(fill="x", pady=10)
+        for k in ["education","skills","experience","awards","references"]:
+            if not isinstance(self.data.get(k), list):
+                self.data[k] = []
 
-        tk.Button(top, text="View CV", command=self.view_cv, bg="#4CAF50", fg="white").pack(side="left", padx=10)
-        tk.Button(top, text="Edit CV", command=self.edit_cv, bg="#2196F3", fg="white").pack(side="left")
-        tk.Button(top, text="Save as PDF", command=self.export_pdf, bg="#FF5722", fg="white").pack(side="left", padx=10)
+        self.selected_key = None
+        self.selected_index = None
 
-        self.container = tk.Frame(self, bg="white")
-        self.container.pack(fill="both", expand=True)
+        container = tk.Frame(self, bg="white")
+        container.pack(fill="both", expand=True)
 
-        self.view_cv()
+        self.display = tk.Frame(container, bg="white")
+        self.display.pack(side="left", fill="both", expand=True, padx=20)
 
-    def clear(self):
-        for w in self.container.winfo_children():
+        right = tk.Frame(container, bg="#ecf0f1", width=260)
+        right.pack(side="right", fill="y")
+
+        tk.Label(right, text="Edit CV", font=("Segoe UI", 14, "bold"), bg="#ecf0f1").pack(pady=10)
+
+        self.section = tk.StringVar(value="education")
+        tk.OptionMenu(right, self.section,
+                      "name","title","phone","email","address","profile",
+                      "education","skills","experience","awards","references"
+                      ).pack(pady=5)
+
+        self.entry = tk.Entry(right)
+        self.entry.pack(pady=5)
+
+        tk.Button(right,text="Add",bg="#27ae60",fg="white",command=self.add_item).pack(pady=2)
+        tk.Button(right,text="Update",bg="#f39c12",fg="white",command=self.update_item).pack(pady=2)
+        tk.Button(right,text="Delete",bg="#e74c3c",fg="white",command=self.delete_item).pack(pady=2)
+
+        tk.Button(right,text="Upload Photo",command=self.upload).pack(pady=5)
+        tk.Button(right,text="Save PDF",bg="#FF5722",fg="white",command=self.export_pdf).pack(pady=5)
+
+        self.refresh_display()
+
+    # ================= SELECT =================
+    def select_basic(self, key, value):
+        self.selected_key = key
+        self.selected_index = None
+        self.entry.delete(0, tk.END)
+        self.entry.insert(0, value)
+        self.section.set(key)
+
+    def select_list(self, key, index, value):
+        self.selected_key = key
+        self.selected_index = index
+        self.entry.delete(0, tk.END)
+        self.entry.insert(0, value)
+        self.section.set(key)
+
+    # ================= DISPLAY =================
+    def refresh_display(self):
+        for w in self.display.winfo_children():
             w.destroy()
 
-    # ================= VIEW =================
-    def view_cv(self):
-        self.clear()
-
-        main = tk.Frame(self.container, bg="#3c4657")
+        main = tk.Frame(self.display, bg="#3c4657")
         main.pack(fill="x")
 
         header = tk.Frame(main, bg="#3c4657")
-        header.pack(pady=30)
+        header.pack(pady=20)
 
-        # ✅ IMAGE FIX
-        if self.data.get("photo") and os.path.exists(self.data.get("photo")):
-            try:
-                img = Image.open(self.data["photo"])
-                img = img.resize((120, 120))
-                img = ImageTk.PhotoImage(img)
+        # ===== CIRCLE IMAGE =====
+        if self.data.get("photo") and os.path.exists(self.data["photo"]):
+            img = Image.open(self.data["photo"]).resize((120,120))
 
-                lbl = tk.Label(header, image=img, bg="#3c4657")
-                lbl.image = img
-                lbl.pack(side="left", padx=40)
-            except Exception as e:
-                print("Image error:", e)
+            mask = Image.new("L", (120,120), 0)
+            draw = ImageDraw.Draw(mask)
+            draw.ellipse((0,0,120,120), fill=255)
+
+            img.putalpha(mask)
+            img = ImageTk.PhotoImage(img)
+
+            lbl = tk.Label(header, image=img, bg="#3c4657")
+            lbl.image = img
+            lbl.pack(side="left", padx=30)
 
         text = tk.Frame(header, bg="#3c4657")
         text.pack(side="left")
 
-        tk.Label(text, text=self.data.get("name", ""), font=("Arial", 28, "bold"), fg="white", bg="#3c4657").pack(anchor="w")
-        tk.Label(text, text=self.data.get("title", ""), font=("Arial", 16), fg="white", bg="#3c4657").pack(anchor="w")
+        name_lbl = tk.Label(text,text=self.data.get("name",""),
+                            font=("Arial",28,"bold"),
+                            fg="white",bg="#3c4657",cursor="hand2")
+        name_lbl.pack(anchor="w")
+        name_lbl.bind("<Button-1>",lambda e:self.select_basic("name",self.data.get("name","")))
 
-        body = tk.Frame(self.container, bg="white")
+        title_lbl = tk.Label(text,text=self.data.get("title",""),
+                             font=("Arial",16),
+                             fg="white",bg="#3c4657",cursor="hand2")
+        title_lbl.pack(anchor="w")
+        title_lbl.bind("<Button-1>",lambda e:self.select_basic("title",self.data.get("title","")))
+
+        body = tk.Frame(self.display, bg="white")
         body.pack(fill="both", expand=True)
 
-        left = tk.Frame(body, bg="white", width=300)
-        left.pack(side="left", fill="y", padx=20, pady=20)
+        left = tk.Frame(body,bg="white",width=300)
+        left.pack(side="left",fill="y",padx=20,pady=20)
 
-        tk.Frame(body, width=2, bg="gray").pack(side="left", fill="y")
+        tk.Frame(body,width=2,bg="gray").pack(side="left",fill="y")
 
-        right = tk.Frame(body, bg="white")
-        right.pack(side="left", fill="both", expand=True, padx=20, pady=20)
+        right = tk.Frame(body,bg="white")
+        right.pack(side="left",fill="both",expand=True,padx=20,pady=20)
 
-        tk.Label(left, text="CONTACT", font=("Arial", 14, "bold")).pack(anchor="w")
-        tk.Label(left, text="📞 " + self.data.get("phone", "")).pack(anchor="w")
-        tk.Label(left, text="✉️ " + self.data.get("email", "")).pack(anchor="w")
-        tk.Label(left, text="🏠 " + self.data.get("address", ""), wraplength=250).pack(anchor="w")
+        # CONTACT
+        tk.Label(left,text="CONTACT",font=("Arial",14,"bold")).pack(anchor="w")
 
-        tk.Label(left, text="").pack()
+        for field,label in [("phone","Phone: "),("email","Email: "),("address","Address: ")]:
+            lbl=tk.Label(left,text=label+self.data.get(field,""),cursor="hand2",wraplength=250)
+            lbl.pack(anchor="w")
+            lbl.bind("<Button-1>",lambda e,f=field:self.select_basic(f,self.data.get(f,"")))
 
-        tk.Label(left, text="EDUCATION", font=("Arial", 14, "bold")).pack(anchor="w")
-        tk.Label(left, text=self.data.get("education", ""), wraplength=250).pack(anchor="w")
+        tk.Label(left,text="").pack()
 
-        tk.Label(left, text="").pack()
+        self.draw(left,"EDUCATION","education")
+        self.draw(left,"SKILLS","skills")
+        self.draw(left,"AWARDS","awards")
 
-        tk.Label(left, text="SKILLS", font=("Arial", 14, "bold")).pack(anchor="w")
-        tk.Label(left, text=self.data.get("skills", ""), wraplength=250).pack(anchor="w")
+        tk.Label(right,text="PROFILE",font=("Arial",14,"bold")).pack(anchor="w")
 
-        tk.Label(left, text="").pack()
+        profile_lbl=tk.Label(right,text=self.data.get("profile",""),
+                             wraplength=500,cursor="hand2")
+        profile_lbl.pack(anchor="w")
+        profile_lbl.bind("<Button-1>",lambda e:self.select_basic("profile",self.data.get("profile","")))
 
-        tk.Label(left, text="AWARDS", font=("Arial", 14, "bold")).pack(anchor="w")
-        tk.Label(left, text=self.data.get("awards", "")).pack(anchor="w")
+        tk.Label(right,text="").pack()
 
-        tk.Label(right, text="PROFILE", font=("Arial", 14, "bold")).pack(anchor="w")
-        tk.Label(right, text=self.data.get("profile", ""), wraplength=500).pack(anchor="w")
+        self.draw(right,"WORK EXPERIENCE","experience")
+        self.draw(right,"REFERENCES","references")
 
-        tk.Label(right, text="").pack()
+    def draw(self,parent,title,key):
+        tk.Label(parent,text=title,font=("Arial",14,"bold")).pack(anchor="w")
 
-        tk.Label(right, text="WORK EXPERIENCE", font=("Arial", 14, "bold")).pack(anchor="w")
-        tk.Label(right, text=self.data.get("experience", ""), wraplength=500).pack(anchor="w")
+        for i,item in enumerate(self.data.get(key,[])):
+            lbl=tk.Label(parent,text="• "+item,cursor="hand2")
+            lbl.pack(anchor="w")
+            lbl.bind("<Button-1>",lambda e,k=key,i=i,val=item:self.select_list(k,i,val))
 
-        tk.Label(right, text="").pack()
+        tk.Label(parent,text="").pack()
 
-        tk.Label(right, text="REFERENCES", font=("Arial", 14, "bold")).pack(anchor="w")
-        tk.Label(right, text=self.data.get("references", "")).pack(anchor="w")
+    # ================= CRUD =================
+    def add_item(self):
+        key=self.section.get()
+        val=self.entry.get()
 
-    # ================= EDIT =================
-    def edit_cv(self):
-        self.clear()
+        if key in ["education","skills","experience","awards","references"]:
+            if val:
+                self.data[key].append(val)
+        else:
+            self.data[key]=val
 
-        frame = tk.Frame(self.container, bg="white")
-        frame.pack(pady=20)
-
-        self.entries = {}
-
-        fields = [
-            "name", "title", "phone", "email", "address",
-            "profile", "education", "skills",
-            "experience", "awards", "references"
-        ]
-
-        r = 0
-
-        for f in fields:
-            tk.Label(frame, text=f.capitalize()).grid(row=r, column=0, sticky="w")
-
-            e = tk.Entry(frame, width=50)
-            e.grid(row=r, column=1, pady=5)
-            e.insert(0, str(self.data.get(f, "")))
-
-            self.entries[f] = e
-            r += 1
-
-        tk.Button(frame, text="Upload Photo", command=self.upload).grid(row=r, column=0)
-        tk.Button(frame, text="Save", bg="#4CAF50", fg="white", command=self.save).grid(row=r, column=1)
-
-    def upload(self):
-        path = filedialog.askopenfilename(
-            filetypes=[("Image Files", "*.png *.jpg *.jpeg *.bmp *.gif")]
-        )
-        if path:
-            self.data["photo"] = path
-
-    def save(self):
-        for k, e in self.entries.items():
-            self.data[k] = e.get()
-
+        self.entry.delete(0,tk.END)
         save_data(self.data)
-        self.view_cv()
+        self.refresh_display()
 
-    # ================= PDF EXPORT =================
-    def export_pdf(self):
-
-        file_path = filedialog.asksaveasfilename(
-            defaultextension=".pdf",
-            filetypes=[("PDF files", "*.pdf")]
-        )
-
-        if not file_path:
+    def update_item(self):
+        if self.selected_key is None:
             return
 
-        section_style = ParagraphStyle(name='section', fontSize=11, leading=14)
+        val=self.entry.get()
 
-        content = []
-        doc = SimpleDocTemplate(file_path)
-
-        temp_file = None
-
-        # ✅ FIXED IMAGE HANDLING
-        if self.data.get("photo") and os.path.exists(self.data["photo"]):
-            try:
-                pil_img = PILImage.open(self.data["photo"]).convert("RGB")
-
-                temp = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
-                pil_img.save(temp.name, "JPEG")
-                temp_file = temp.name
-
-                img = RLImage(temp_file, width=1.2*inch, height=1.2*inch)
-            except Exception as e:
-                print("PDF Image Error:", e)
-                img = Spacer(1, 1)
+        if self.selected_key in ["education","skills","experience","awards","references"]:
+            self.data[self.selected_key][self.selected_index]=val
         else:
-            img = Spacer(1, 1)
+            self.data[self.selected_key]=val
 
-        text_part = Paragraph(
-            f"<b>{self.data.get('name','')}</b><br/>{self.data.get('title','')}",
-            ParagraphStyle(
-                name='header_text',
-                fontSize=20,
-                textColor=colors.white,
-                leading=24
-            )
+        save_data(self.data)
+        self.refresh_display()
+
+    def delete_item(self):
+        if self.selected_key is None:
+            return
+
+        if self.selected_key in ["education","skills","experience","awards","references"]:
+            del self.data[self.selected_key][self.selected_index]
+        else:
+            self.data[self.selected_key]=""
+
+        self.selected_key=None
+        self.selected_index=None
+        self.entry.delete(0,tk.END)
+
+        save_data(self.data)
+        self.refresh_display()
+
+    def upload(self):
+        path=filedialog.askopenfilename(filetypes=[("Image","*.png *.jpg *.jpeg")])
+        if path:
+            self.data["photo"]=path
+            save_data(self.data)
+            self.refresh_display()
+
+    # ================= PDF =================
+    def export_pdf(self):
+        path=filedialog.asksaveasfilename(defaultextension=".pdf")
+        if not path:
+            return
+
+        doc=SimpleDocTemplate(path)
+        content=[]
+
+        temp_file=None
+
+        # circle image for PDF
+        if self.data.get("photo") and os.path.exists(self.data["photo"]):
+            pil=PILImage.open(self.data["photo"]).convert("RGB")
+            size=min(pil.size)
+            pil=pil.crop((0,0,size,size))
+
+            mask=PILImage.new("L",(size,size),0)
+            draw=ImageDraw.Draw(mask)
+            draw.ellipse((0,0,size,size),fill=255)
+            pil.putalpha(mask)
+
+            temp=tempfile.NamedTemporaryFile(delete=False,suffix=".png")
+            pil.save(temp.name,"PNG")
+            temp_file=temp.name
+
+            img=RLImage(temp_file,width=1.3*inch,height=1.3*inch)
+        else:
+            img=Spacer(1,1)
+
+        header_text=Paragraph(
+            f"<b>{self.data.get('name','')}</b><br/><font size=12>{self.data.get('title','')}</font>",
+            ParagraphStyle(name='h',fontSize=18,leading=22,textColor=colors.white)
         )
 
-        header = Table([[img, text_part]], colWidths=[1.5*inch, 4.5*inch])
-
+        header=Table([[img,header_text]],colWidths=[1.6*inch,4.4*inch])
         header.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#3c4657")),
-            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-            ('LEFTPADDING', (0,0), (-1,-1), 20),
-            ('RIGHTPADDING', (0,0), (-1,-1), 20),
-            ('TOPPADDING', (0,0), (-1,-1), 20),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 20),
+            ('BACKGROUND',(0,0),(-1,-1),colors.HexColor("#3c4657")),
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('LEFTPADDING',(0,0),(-1,-1),20),
+            ('TOPPADDING',(0,0),(-1,-1),15),
+            ('BOTTOMPADDING',(0,0),(-1,-1),15),
         ]))
 
         content.append(header)
-        content.append(Spacer(1, 15))
+        content.append(Spacer(1,15))
 
-        left = f"""
+        def make(k):
+            return "<br/>".join("• "+x for x in self.data.get(k,[]))
+
+        left=Paragraph(f"""
         <b>CONTACT</b><br/>
         Phone: {self.data.get('phone','')}<br/>
         Email: {self.data.get('email','')}<br/>
         Address: {self.data.get('address','')}<br/><br/>
 
-        <b>EDUCATION</b><br/>
-        {self.data.get('education','')}<br/><br/>
+        <b>EDUCATION</b><br/>{make('education')}<br/><br/>
+        <b>SKILLS</b><br/>{make('skills')}<br/><br/>
+        <b>AWARDS</b><br/>{make('awards')}
+        """,ParagraphStyle(name='l',leading=14))
 
-        <b>SKILLS</b><br/>
-        {self.data.get('skills','')}<br/><br/>
+        right=Paragraph(f"""
+        <b>PROFILE</b><br/>{self.data.get('profile','')}<br/><br/>
+        <b>WORK EXPERIENCE</b><br/>{make('experience')}<br/><br/>
+        <b>REFERENCES</b><br/>{make('references')}
+        """,ParagraphStyle(name='r',leading=14))
 
-        <b>AWARDS</b><br/>
-        {self.data.get('awards','')}
-        """
-
-        right = f"""
-        <b>PROFILE</b><br/>
-        {self.data.get('profile','')}<br/><br/>
-
-        <b>WORK EXPERIENCE</b><br/>
-        {self.data.get('experience','')}<br/><br/>
-
-        <b>REFERENCES</b><br/>
-        {self.data.get('references','')}
-        """
-
-        body = Table(
-            [[Paragraph(left, section_style), Paragraph(right, section_style)]],
-            colWidths=[2.5*inch, 3.5*inch]
-        )
-
-        body.setStyle(TableStyle([
-            ('LINEAFTER', (0,0), (0,-1), 1, colors.grey),
-            ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            ('LEFTPADDING', (0,0), (-1,-1), 15),
-            ('RIGHTPADDING', (0,0), (-1,-1), 15),
+        table=Table([[left,right]],colWidths=[2.5*inch,3.5*inch])
+        table.setStyle(TableStyle([
+            ('LINEAFTER',(0,0),(0,-1),1,colors.grey),
+            ('VALIGN',(0,0),(-1,-1),'TOP'),
         ]))
 
-        content.append(body)
+        content.append(table)
 
         doc.build(content)
 
-        # ✅ TEMP FILE DELETE
         if temp_file:
-            try:
-                os.remove(temp_file)
-            except:
-                pass
+            os.remove(temp_file)
 
 
-# ================= RUN =================
 if __name__ == "__main__":
-
-    root = tk.Tk()
-    root.title("CV Builder")
+    root=tk.Tk()
     root.geometry("1200x700")
-
-    app = CV(root, user_id=1)
-    app.pack(fill="both", expand=True)
-
+    CV(root).pack(fill="both",expand=True)
     root.mainloop()
