@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import filedialog
 import json, os, tempfile
 
-import self
 from PIL import Image, ImageTk, ImageDraw
 from PIL import Image as PILImage
 

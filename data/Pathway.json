@@ -1,0 +1,102 @@
+{
+  "Software Engineer": {
+    "Programming Languages": ["Python", "Java", "C++"],
+    "Database": ["MySQL", "PostgreSQL"],
+    "Tools": ["Git", "Docker"]
+  },
+  "Frontend Developer": {
+    "Programming Languages": ["JavaScript", "HTML", "CSS"],
+    "Database": [],
+    "Tools": ["React", "Git", "Figma"]
+  },
+  "Backend Developer": {
+    "Programming Languages": ["Python", "Java", "Node.js"],
+    "Database": ["MySQL", "MongoDB"],
+    "Tools": ["Git", "Docker"]
+  },
+  "Full Stack Developer": {
+    "Programming Languages": ["JavaScript", "Python"],
+    "Database": ["MySQL", "MongoDB"],
+    "Tools": ["React", "Node.js", "Git"]
+  },
+  "Data Analyst": {
+    "Programming Languages": ["Python"],
+    "Database": ["SQL"],
+    "Tools": ["Excel", "Power BI"]
+  },
+  "Data Scientist": {
+    "Programming Languages": ["Python", "R"],
+    "Database": ["SQL"],
+    "Tools": ["Pandas", "TensorFlow", "Jupyter"]
+  },
+  "Machine Learning Engineer": {
+    "Programming Languages": ["Python"],
+    "Database": ["SQL"],
+    "Tools": ["TensorFlow", "PyTorch", "Scikit-learn"]
+  },
+  "DevOps Engineer": {
+    "Programming Languages": ["Python", "Bash"],
+    "Database": [],
+    "Tools": ["Docker", "Kubernetes", "CI/CD", "Git"]
+  },
+  "Cyber Security Specialist": {
+    "Programming Languages": ["Python"],
+    "Database": [],
+    "Tools": ["Wireshark", "Metasploit", "Linux"]
+  },
+  "Mobile App Developer": {
+    "Programming Languages": ["Java", "Kotlin", "Dart"],
+    "Database": ["Firebase"],
+    "Tools": ["Android Studio", "Flutter"]
+  },
+  "UI/UX Designer": {
+    "Programming Languages": [],
+    "Database": [],
+    "Tools": ["Figma", "Adobe XD", "Photoshop"]
+  },
+  "QA Engineer": {
+    "Programming Languages": ["Python", "Java"],
+    "Database": ["SQL"],
+    "Tools": ["Selenium", "JIRA"]
+  },
+  "Game Developer": {
+    "Programming Languages": ["C++", "C#"],
+    "Database": [],
+    "Tools": ["Unity", "Unreal Engine"]
+  },
+  "Cloud Engineer": {
+    "Programming Languages": ["Python"],
+    "Database": [],
+    "Tools": ["AWS", "Azure", "Docker"]
+  },
+  "System Administrator": {
+    "Programming Languages": ["Bash"],
+    "Database": [],
+    "Tools": ["Linux", "Shell", "Networking"]
+  },
+  "AI Engineer": {
+    "Programming Languages": ["Python"],
+    "Database": ["SQL"],
+    "Tools": ["TensorFlow", "PyTorch"]
+  },
+  "Blockchain Developer": {
+    "Programming Languages": ["Solidity", "JavaScript"],
+    "Database": [],
+    "Tools": ["Ethereum", "Web3"]
+  },
+  "Embedded Systems Engineer": {
+    "Programming Languages": ["C", "C++"],
+    "Database": [],
+    "Tools": ["Arduino", "Raspberry Pi"]
+  },
+  "Network Engineer": {
+    "Programming Languages": [],
+    "Database": [],
+    "Tools": ["Cisco", "Routing", "Switching"]
+  },
+  "IT Support Specialist": {
+    "Programming Languages": [],
+    "Database": [],
+    "Tools": ["Windows", "Troubleshooting", "Networking"]
+  }
+}
