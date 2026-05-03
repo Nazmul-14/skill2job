@@ -1,13 +1,21 @@
 {
     "1": {
         "Programming Languages": [
-            "hgv"
+            "c++",
+            "c",
+            "python",
+            "Java",
+            "Javascript"
         ],
         "Database": [
-            "gk"
+            "MySQL",
+            "SQL"
         ],
         "Tools": [
-            "trdrd"
+            "Git",
+            "GitHub",
+            "VS Code",
+            "Docker"
         ]
     }
 }
