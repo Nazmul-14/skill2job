@@ -15,7 +15,7 @@ class Profile(tk.Frame):
         self.photo_path = None
         self.profile_img = None
 
-        # ✅ USER-WISE FILE PATH
+        #  USER-WISE FILE PATH
         self.DATA_DIR = os.path.join("data", "profiles")
         self.DATA_FILE = os.path.join(
             self.DATA_DIR, f"profile_{self.user_id}.json"
@@ -29,8 +29,9 @@ class Profile(tk.Frame):
     def _build_scroll_layout(self):
 
         self.canvas = tk.Canvas(self, bg="#eeeeee", highlightthickness=0)
-        self.scrollbar = tk.Scrollbar(self, orient="vertical",
-                                      command=self.canvas.yview)
+        self.scrollbar = tk.Scrollbar(
+            self, orient="vertical", command=self.canvas.yview
+        )
 
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
@@ -55,10 +56,20 @@ class Profile(tk.Frame):
             lambda e: self.canvas.itemconfig(self.window, width=e.width)
         )
 
-        self.canvas.bind_all(
-            "<MouseWheel>",
-            lambda e: self.canvas.yview_scroll(
-                int(-1 * (e.delta / 120)), "units")
+        #   MOUSE SCROLL
+        self._bind_mousewheel()
+
+    def _on_mousewheel(self, event):
+        self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+    def _bind_mousewheel(self):
+        self.canvas.bind(
+            "<Enter>",
+            lambda e: self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+        )
+        self.canvas.bind(
+            "<Leave>",
+            lambda e: self.canvas.unbind_all("<MouseWheel>")
         )
 
     # ================= CARD =================
